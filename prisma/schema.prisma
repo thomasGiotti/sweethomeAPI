@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,30 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//USERS
 model User {
   id        String   @id @default(uuid())
   firstname String   @db.VarChar(255)
   lastname  String   @db.VarChar(255)
-  email     String
+  email     String   @unique
   photo     String?  @default("default.png")
   verified  Boolean? @default(false)
 
   password String
-  role     RoleEnumType? @default(client)
+  role     RoleEnumType? @default(user)
 
   verificationCode String? @unique @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([email, verificationCode])
-  @@index([email, verificationCode])
+  provider           String?
+  passwordResetToken String?
+  passwordResetAt    DateTime?
+
+  @@unique([email, verificationCode, passwordResetToken])
+  @@index([email, verificationCode, passwordResetToken])
   @@map(name: "users")
 }
 
 enum RoleEnumType {
-  client
+  user
   admin
-  stateAgent
 }
